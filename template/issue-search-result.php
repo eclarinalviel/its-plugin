@@ -1,16 +1,8 @@
 <?php
-
-//$search_posts = post()->search_posts;
-if( in('search_field') ) {
-    $search_posts = get_posts(array(
-        's' => in('search_field')
-    ));
-}
-if($search_posts){
-    $posts = $search_posts;
-}else {
-    $posts = post()->getPostsId();
-}
+get_header();
+//    $posts = post()->issue_search();
+$posts = post()->search_posts();
+var_dump($posts);
 ?>
 <div class="wrap">
 
@@ -18,11 +10,11 @@ if($search_posts){
 
     <div class="forum-list">
 
-        <form action="" method="POST">
+<!--        <form method="post" action="--><?php //echo home_url( '/issue/list' ); ?><!--">-->
+<!--        <form action="?" method="GET">-->
 <!--            <input type="hidden" name="do" value="issue_search">-->
 <!--            <input type="hidden" name="on_error" value="alert_and_go_back">-->
-<!--            <input type="hidden" name="return_url" value="--><?php //echo issues()->listURL()?><!--">-->
-<!--            <input type="hidden" name="return_url" value="--><?php //echo issues()->urlListPage()?><!--">-->
+<!--            <input type="hidden" name="return_url" value="--><?php //echo issues()->listURL()?><!--?>">-->
 
             <div class="col-lg-8 input-group">
                 <div class="input-group">
@@ -46,23 +38,19 @@ if($search_posts){
             </div>
         </form>
 
-        <?php if ( $posts ) {
-            for($i = 0; $i < count($posts); $i++) {
-
-                foreach ($posts[$i] as $key => $id) {
-                    ?>
+        <?php        ?>
                     <div class="col-lg-4">
                         <div class="card text-xs-center">
                             <div class="card-block">
-                                <h4 class="card-title"><?php echo post()->meta($id, 'issue_title'); ?></h4>
+                                <h4 class="card-title"><?php  ?></h4>
                                 <p class="card-text">
                                     Label: <?php
                                     $cat = post()->meta($id, 'issue_label');
                                     echo $cat; ?><br/>
-                                    Assigned to: <?php echo post()->meta($id, 'issue_assignee'); ?><br/>
-                                    Deadine: <?php echo post()->meta($id, 'issue_deadline'); ?><br/>
-                                    Status: <?php echo post()->meta($id, 'issue_status') ?><br/>
-                                    Posted by: <?php echo post()->meta($id, 'issue_author'); ?><br/>
+                                    Assigned to: <?php  ?><br/>
+                                    Deadine: <?php  ?><br/>
+                                    Status: <?php  ?><br/>
+                                    Posted by: <?php ?><br/>
                                 </p>
 
                                 <input type="hidden" name="do" value="view_issue">
@@ -83,37 +71,13 @@ if($search_posts){
 
                                 ?>
                                 <progress class="progress progress-striped progress-warning" value="75" max="100">75%</progress>
-                                <!--                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="--><?php //echo $percentageRounded; ?><!--"-->
-                                <!--                                     aria-valuemin="0" aria-valuemax="100" style="width:--><?php //echo $percentageRounded; ?>
                             </div>
                         </div>
                     </div>
 
-                <?php }
-            }
-        } ?>
+                <?php  ?>
     </div>
 
-    <?php
-
-    // Previous/next page navigation.
-    //    $links = paginate_links( array(
-    //        'mid_size'              => 5,
-    //        'prev_text'             =>'<<',
-    //        'next_text'             => '>>',
-    //        'before_page_number'    => '',
-    //        'after_page_number'     => '',
-    //        'end_size' => 0,
-    //        'type' => 'array',
-    //    ) );
-    //    if ( $links ) {
-    //        $r = "<div class='pagination'><ul>\n\t<li>";
-    //        $r .= join("</li>\n\t<li>", $links);
-    //        $r .= "</li>\n</ul>\n</div>\n";
-    //        echo $r;
-    //    }
-
-
-    ?>
 </div>
+<?php get_footer(); ?>
 

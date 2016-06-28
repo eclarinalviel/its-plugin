@@ -21,6 +21,7 @@ include DIR_ITS . 'etc/function.php';
 include DIR_ITS . 'etc/action.php';
 //include DIR_ITS . 'etc/filter.php';
 include_once DIR_CLASS . 'issue.php';
+include_once DIR_CLASS . 'post.php';
 include_once DIR_CLASS . 'library.php';
 
 issues()

@@ -42,12 +42,12 @@ function xlog( $message ) {
 /**
  * @deprecated use forum()->url...
  */
-function url_issue_page() {           echo get_url_issue_page(); }
+//function url_issue_page() {           echo get_url_issue_page(); }
 //
 ///**
 // * @deprecated use forum()->url...
 // */
-function get_url_issue_page() {       return issues()->urlViewPage(); }
+//function get_url_issue_page() {       return issues()->urlViewPage(); }
 
 /**
  * @deprecated use forum()->url...
@@ -58,6 +58,11 @@ function url_admin_page() {           echo get_url_admin_page(); }
  * @deprecated use forum()->url...
  */
 function get_url_admin_page() {       return issues()->urlAdminPage(); }
+
+
+function url_list_page() {           echo get_url_list_page(); }
+
+function get_url_list_page() {       return issues()->urlListPage(); }
 
 
 /**

@@ -1,7 +1,7 @@
 <?php
 
 add_action('init', function() {
-    if ( in('do') ) issues()->submit();
+    if ( in('do') ) post()->submit();
     wp_enqueue_script( 'wp-util' );
     wp_enqueue_style( 'font-awesome', URL_ITS . 'css/font-awesome/css/font-awesome.min.css' );
     wp_enqueue_style( 'bootstrap', URL_ITS . '/css/bootstrap/css/bootstrap.min.css' );
@@ -39,10 +39,10 @@ add_action('admin_menu', function () {
     );
 //    add_submenu_page(
 //        'issue-tracker-plugin/template/issue-list.php', // parent slug id
-//        __('Milestones', 'its'),
-//        __('Milestones', 'its'),
+//        __('Members', 'its'),
+//        __('Members', 'its'),
 //        'manage_options',
-//        'issue-tracker-plugin/template/milestones.php',
+//        'issue-tracker-plugin/template/members.php',
 //        ''
 //    );
 } );

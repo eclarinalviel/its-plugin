@@ -1,25 +1,19 @@
 <?php
-//include_once DIR_CLASS . 'meta.php';
-$parent = get_category_by_slug( ITS_CATEGORY_SLUG )->term_id;
-$categories = get_categories(
-    array(
-        'hide_empty' => 0,
-        'parent' => $parent
-        )
-);
-//var_dump($categories);
+$categories = post()->getCategories();
 $user_login = wp_get_current_user();
+$users = post()->getUsers();
+//var_dump($users);
 ?>
 <div class="wrap">
 
-    <h2>List of Issues</h2>
+    <h2>Add New Issue</h2>
 
     <div class="forum-list">
 
         <form action="?" method="POST">
             <input type="hidden" name="do" value="post_create">
             <input type="hidden" name="on_error" value="alert_and_go_back">
-            <input type="hidden" name="return_url" value="<?php echo urlencode( url_admin_page() )?>">
+            <input type="hidden" name="return_url" value="<?php echo issues()->viewURL($id)?>">
 
             <div class="forum-list container">
                 <div class="col-lg-8">
@@ -47,20 +41,30 @@ $user_login = wp_get_current_user();
                 </div>
 
                 <div class="col-lg-4 container">
-                    <div class="panel panel-default">
-                        <div class="panel-heading"></div>
-                        <div class="panel-body">
-                            <label for="label"> Issue Type: </label>
-
-                                <select id = "label" class="col-lg-12 c-select" name = "issue_label">
+                            <label> Labels: </label>
+                            <div class="input-group-btn">
+                                <button tabindex="-1" class="btn btn-secondary" type="button">Issue Type:</button>
+                                <button tabindex="-1" data-toggle="dropdown" class="btn btn-secondary dropdown-toggle" type="button">
+                                    <span class="caret"></span>
+                                </button>
+                                <div class="dropdown-menu">
                                     <?php foreach($categories as $cat) { ?>
-                                    <option value="<?php echo $cat->cat_name;  ?>">
-                                        <?php echo $cat->cat_name; ?>
-                                    </option >
+                                        <a class="dropdown-item" href="#">
+                                            <input type="checkbox" value="<?php echo $cat->cat_name;  ?>" name="issue_label[]">
+                                            <?php echo $cat->cat_name;  ?>
+                                        </a>
                                     <?php } ?>
-                            </select >
-                        </div>
-                    </div>
+                                </div>
+                            </div>
+
+<!--                                <select id = "label" class="col-lg-12 c-select" name = "issue_label">-->
+<!--                                    --><?php //foreach($categories as $cat) { ?>
+<!--                                    <option value="--><?php //echo $cat->cat_name;  ?><!--">-->
+<!--                                        --><?php //echo $cat->cat_name; ?>
+<!--                                    </option >-->
+<!--                                    --><?php //} ?>
+<!--                                </select >-->
+
 
                     <div class="">
                         <label for="milestone"> Deadline: </label>
@@ -68,16 +72,27 @@ $user_login = wp_get_current_user();
                     </div>
 
                     <div class="">
-                        <label for="assignee"> Assignees: </label>
-                        <select id="assignee" class="col-lg-12 c-select" name="issue_assignee">
-                            <option selected disabled> Assignee </option>
-                        </select>
+                        <label> Assignees: </label>
+                        <div class="input-group-btn">
+                            <button tabindex="-1" class="btn btn-secondary" type="button">Assign to:</button>
+                            <button tabindex="-1" data-toggle="dropdown" class="btn btn-secondary dropdown-toggle" type="button">
+                                <span class="caret"></span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <?php foreach($users as $user){ ?>
+                                <a class="dropdown-item" href="#">
+                                    <input type="checkbox" value="<?php echo $user->user_login; ?>" name="issue_assignee[]">
+                                    <?php echo $user->user_login; ?>
+                                </a>
+                                <?php } ?>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="">
                         <label for="status"> Status: </label>
                         <select id="status" class="col-lg-12 c-select" name="issue_status">
-                            <option selected disabled> Status </option>
                             <option value="open">Open</option>
                             <option value="close">Close</option>
                         </select>
