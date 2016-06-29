@@ -37,12 +37,4 @@ add_action('admin_menu', function () {
         'issue-tracker-plugin/template/labels.php',
         ''
     );
-//    add_submenu_page(
-//        'issue-tracker-plugin/template/issue-list.php', // parent slug id
-//        __('Members', 'its'),
-//        __('Members', 'its'),
-//        'manage_options',
-//        'issue-tracker-plugin/template/members.php',
-//        ''
-//    );
 } );
