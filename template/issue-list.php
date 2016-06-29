@@ -1,109 +1,82 @@
 <?php
-$posts = post()->getPosts();
+/* if search button or "assigned to you" button is clicked, call the search function
+ * @todo unit tests
+ */
+$posts = "";
+if($_REQUEST['search'] || in('assigned_to_user')){
+   $posts = post()->issue_search();
+//    var_dump(count($posts));
+}else{
+    $posts = post()->getPosts();
+}
 
+/*Custom CSS*/
+wp_enqueue_style( 'issue-view', URL_ITS . 'css/issue-view.css' );
 ?>
 <div class="wrap">
 
     <h2>Issues</h2>
 
-    <div class="forum-list">
-
         <form action="" method="POST">
-<!--            <input type="hidden" name="do" value="issue_search">-->
-<!--            <input type="hidden" name="on_error" value="alert_and_go_back">-->
-<!--            <input type="hidden" name="return_url" value="--><?php //echo issues()->listURL()?><!--">-->
-<!--            <input type="hidden" name="return_url" value="--><?php //echo issues()->urlListPage()?><!--">-->
-
-            <div class="col-lg-8 input-group">
+            <div class="col-lg-6 input-group">
                 <div class="input-group">
                     <div class="input-group-btn">
-                        <button tabindex="-1" class="btn btn-secondary" type="button">Filters</button>
+                        <button tabindex="-1" class="btn btn-secondary" type="button">Search Filters</button>
                         <button tabindex="-1" data-toggle="dropdown" class="btn btn-secondary dropdown-toggle" type="button">
                             <span class="caret"></span>
                         </button>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#"> <input type="checkbox" value="title" name="filter[]">Title or Content</a>
-                            <a class="dropdown-item" href="#"> <input type="checkbox" value="label" name="filter[]">Labels</a>
-                            <a class="dropdown-item" href="#"><input type="checkbox" value="deadline" name="filter[]">Deadline</a>
-                            <a class="dropdown-item" href="#"><input type="checkbox" value="assigned" name="filter[]">Assigned to you</a>
+                            <a class="dropdown-item" href="#"> <input type="checkbox" value="issue_title" name="filter[]">Title or Content</a>
+                            <a class="dropdown-item" href="#"> <input type="checkbox" value="issue_label" name="filter[]">Labels</a>
+                            <a class="dropdown-item" href="#"><input type="checkbox" value="issue_deadline" name="filter[]">Deadline</a>
+<!--                            <a class="dropdown-item" name="assigned_to_user">Assigned to you</a>-->
+                            <div class="dropdown-divider"></div>
+                            <input type="submit" class="btn btn-secondary btn-block" value="Assigned to you" name="assigned_to_user">
                         </div>
                     </div>
-                    <input type="text" class="form-control" name="search_field" placeholder="Search by title, content, labels, deadline(e.g. 2016/06/30)">
+                    <input type="text" class="form-control" name="search_field" placeholder="Search by title, author, labels etc.">
                 </div>
             </div>
-            <div class="col-lg-4">
-                <input type="submit" class="btn btn-danger" value="Search!">
+            <div class="col-lg-3">
+                <input type="date" class="form-control date" name="deadline" >
+            </div>
+            <div class="col-lg-2">
+                <input type="submit" class="btn btn-danger" value="Search!" name="search">
             </div>
         </form>
 
-        <?php if ( $posts ) {
-//            for($i = 0; $i < count($posts); $i++) {
-
-                foreach ($posts as $single_post) {
-                    ?>
+        <?php
+            if ( $posts ) :
+                foreach ($posts as $single_post) : setup_postdata($single_post); ?>
                     <div class="col-lg-4">
-                        <div class="card text-xs-center">
-                            <div class="card-block">
-                                <h4 class="card-title"><?php echo post()->meta($single_post->ID, 'issue_title'); ?></h4>
-                                <p class="card-text">
-                                    Label: <?php
-                                    $cat = post()->meta($id, 'issue_label');
-                                    echo $cat; ?><br/>
-                                    Assigned to: <?php echo post()->meta($single_post->ID, 'issue_assignee'); ?><br/>
-                                    Deadine: <?php echo post()->meta($single_post->ID, 'issue_deadline'); ?><br/>
-                                    Status: <?php echo post()->meta($single_post->ID, 'issue_status') ?><br/>
-                                    Posted by: <?php echo post()->meta($single_post->ID, 'issue_author'); ?><br/>
-                                </p>
+                        <div class="card card-block fixed-height">
+                            <h4 class="card-title"><?php echo post()->meta($single_post->ID, 'issue_title'); ?></h4>
+                            <p class="card-text">
+                            <b>Label: </b>
+                            <?php $categories = post()->meta($single_post->ID, 'issue_label');
+                            foreach($categories as $category){
+                                echo $category .", ";
+                            }
+                            ?><br/>
+                            <b>Assigned to:</b> <?php
+                            $assignees =  post()->meta($single_post->ID, 'issue_assignee');
+                            foreach($assignees as $assignee){
+                                echo $assignee .", ";
+                            }
 
-                                <input type="hidden" name="do" value="view_issue">
-                                <a href="<?php echo issues()->viewURL($single_post->ID)?>" target="_blank" class="btn btn-primary"> View Issue </a>
-                                </form>
-                            </div>
-                            <div class="card-footer text-muted">
-                                <?php
-                                $post_date = get_the_time('Y-m-d',$single_post->ID);
-                                $deadline = post()->meta($id, 'issue_deadline');
+                            ?><br/>
+                                <b>Deadine:</b> <?php echo post()->meta($single_post->ID, 'issue_deadline'); ?><br/>
+                                <b>Status:</b> <?php echo post()->meta($single_post->ID, 'issue_status') ?><br/>
+                                <b>Posted by: </b><?php echo post()->meta($single_post->ID, 'issue_author'); ?><br/>
+                            </p>
 
-                                $now = date("Y-m-d");
-                                $end = date($deadline);
-                                $date_percentage = date_diff( new DateTime($post_date), new DateTime($end) );
-                                $date_percentage_new = date_diff( new DateTime($now), new DateTime($end) );
-                                $percentage = $date_percentage_new / $date_percentage * 100;
-                                $percentageRounded = round($percentage);
-
-                                ?>
-                                <progress class="progress progress-striped progress-warning" value="75" max="100">75%</progress>
-                                <!--                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="--><?php //echo $percentageRounded; ?><!--"-->
-                                <!--                                     aria-valuemin="0" aria-valuemax="100" style="width:--><?php //echo $percentageRounded; ?>
-                            </div>
+                            <input type="hidden" name="do" value="view_issue">
+                            <a href="<?php echo issues()->viewURL($single_post->ID)?>" target="_blank" class="btn btn-primary"> View Issue </a>
                         </div>
                     </div>
 
-                <?php }
-//            }
-        } ?>
-    </div>
+                <?php endforeach; ?>
+       <?php endif ?>
 
-    <?php
-
-    // Previous/next page navigation.
-    //    $links = paginate_links( array(
-    //        'mid_size'              => 5,
-    //        'prev_text'             =>'<<',
-    //        'next_text'             => '>>',
-    //        'before_page_number'    => '',
-    //        'after_page_number'     => '',
-    //        'end_size' => 0,
-    //        'type' => 'array',
-    //    ) );
-    //    if ( $links ) {
-    //        $r = "<div class='pagination'><ul>\n\t<li>";
-    //        $r .= join("</li>\n\t<li>", $links);
-    //        $r .= "</li>\n</ul>\n</div>\n";
-    //        echo $r;
-    //    }
-
-
-    ?>
 </div>
 

@@ -56,13 +56,16 @@ class post
     {
         if (!in('issue_title')) ferror(-50014, 'Title is not provided');
         if (!in('issue_description')) ferror(-50015, 'Description is not provided');
-        $category = get_cat_ID(in('issue_label'));
+        $category = in('issue_label');
+        foreach($category as $cat_id){ // get the name of each category
+            $cat_name[] = get_cat_name($cat_id);
+        }
         $args = array(
             'ID' => $id,
             'post_title' => in('issue_title'),
             'post_content' => in('issue_description'),
             'post_status' => 'publish',
-            'post_category' => [$category], //categories should be array,
+            'post_category' => $category, //categories should be array,
             'post_author', get_current_user_id(),
         );
         $post_ID = wp_insert_post($args, true);
@@ -73,14 +76,8 @@ class post
         $this->meta($post_ID, 'issue_status', in('issue_status'));
         $this->meta($post_ID, 'issue_deadline', in('issue_deadline')); 
         $this->meta($post_ID, 'issue_author', in('issue_author'));
-        $assignees = in('issue_assignee');
-        $labels = in('issue_labels');
-        if (isset($labels) && !empty($labels)) {
-            $this->meta($post_ID, 'issue_label', $labels);
-        }
-        if (isset($assignees) && !empty($assignees)) {
-            $this->meta($post_ID,'issue_assignee',$assignees);
-        }
+        $this->meta($post_ID, 'issue_label', $cat_name); //saves serialize array on db (multiple values)
+        $this->meta($post_ID,'issue_assignee',in('issue_assignee')); //saves serialize array on db (multiple values)
 
         if (is_wp_error($post_ID)) {
             return $post_ID->get_error_message();
@@ -162,18 +159,26 @@ class post
     /**
      * get ID of posts & post meta of child category under parents category
      */
-    public function getPosts()
+    public function getPosts($args = NULL)
     {
-
         $categories = $this->getCategories();
         foreach ($categories as $category) {
-            $posts[] = get_posts(array(
-                'category' => $category->term_id,
-            ));
+            $ids[] = $category->term_id;
+
         };
+
+        if( !isset($args) && empty($args) ){ // If there's no $args passed.
+            $args = array(
+                'posts_per_page' => 6,
+                'category__in' => $ids
+            );
+        }
+
+        $posts[] = get_posts($args);
         foreach($posts as $post){
             $single_post = $post;
         }
+
         return $single_post;
     }
 
@@ -183,11 +188,11 @@ class post
 
     public function getCategories()
     {
-        $parent = get_category_by_slug(ITS_CATEGORY_SLUG)->term_id;
+        $parent = get_category_by_slug(ITS_CATEGORY_SLUG);
         $categories = get_categories(
             array(
                 'hide_empty' => 0,
-                'parent' => $parent
+                'parent' => $parent->term_id,
             )
         );
         return $categories;
@@ -263,39 +268,83 @@ class post
     public function current_user(){
         global $current_user;
         get_currentuserinfo();
+
+        return $current_user; // recently added
     }
     /*
      * Search Issues by Title/Content, Labels, Deadline, Assigned to the User
      * @todo unit testing
      * */
-    private function issue_search(){
+    public function issue_search(){
         /*Things to consider:
-         * is searching possible even without input? YES
-         * is searching possible without filter click? YES
-         * Use multiple if else for each request? NO! use universal search instead. Except for Assigned.
+         * is searching possible even without input? YES, when select is clicked
+         * is searching possible without filter click? YES, using textbox
+         * Use multiple if else for each request? NO! use universal search instead. Except for "Assigned to you".
          * */
-            $this->search_posts();
+
+        // Get the categories under parent category - ITS
+        $categories = $this->getCategories();
+        foreach ($categories as $category) {
+            $ids[] = $category->term_id;
+
+        };
+
+        if(in('assigned_to_user')){ // "Assigned to you" is clicked
+            $current_user = $this->current_user();
+            $args = array(
+                'posts_per_page' => -1,
+                'category__in' => $ids,
+                'meta_query' => array( // not accurate
+                    'key' => 'issue_assignee',
+                    'value' => $current_user->user_login,
+                    'compare' => 'IN'
+                )
+            );
+        } elseif( in('search_field')) { // If search using search field
+
+            if (in('filter')) { //  There's a filter selected
+                $args = $this->search_meta(in('filter'), in('search_field'), in('deadline'));
+                var_dump($args);
+            } else { // No filters selected;
+                $args = $this->search_meta('', in('search_field'), in('deadline'));
+            }
+
+        }elseif ( in('deadline') ){ // search only by deadline
+            $args = $this->search_meta('', '', in('deadline'));
         }
 
-//        if( in('filter') ){ //Filters/ Option/s in Dropdown is selected
-//            foreach( in('filter') as $selected ) { //get all selected checboxes on search
-//            echo "SELECTED: ". $selected;
-//
-//
-//            }
-//        }
-//        var_dump(in('search_field'));
-
-    public function search_posts(){
-
-    if( in('search_field') ) {
-        $search_posts = get_posts(array(
-            's' => in('search_field')
-        ));
-    }
-        return $search_posts;
+        $post = get_posts($args); //$this->getPosts
+        return $post;
     }
 
+    public function search_meta($meta_keys = NULL, $value = NULL, $deadline = NULL){
+
+        if(!isset($meta_keys) || empty($meta_keys)) { // If there's no meta key passed, use this one
+            $meta_keys = array('issue_title', 'issue_content', 'issue_label', 'issue_assignees', 'issue_author', 'issue_deadline');
+        }
+
+        // Get the categories under parent category - ITS
+        $categories = $this->getCategories();
+        foreach ($categories as $category) {
+            $ids[] = $category->term_id;
+
+        };
+
+        // Check if atleast either $value or $deadline is not empty/null
+        if( isset($value) && !empty($value) || isset($deadline) && !empty($deadline) ){
+            for($i = 0; $i <= count($meta_keys); $i++){
+//                echo $meta_keys[$i] . " Value: " .$value;
+                $result = array(
+                    'posts_per_page' => -1, //OK
+                    'category__in' => $ids,
+                    'meta_key' => $meta_keys[$i],
+                    'meta_value' => array($value, $deadline)
+                );
+            }
+
+        }
+        return $result;
+    }
 
 }
 

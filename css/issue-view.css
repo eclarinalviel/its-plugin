@@ -1,3 +1,8 @@
+/*  issue-list.php    */
+.fixed-height{
+    height: 250px;
+}
+/*  issue-view.php  */
 .issue-title{
     padding: 10px 0px 10px 0px;
     text-transform: uppercase;
@@ -8,3 +13,11 @@
     padding: 10px 0px 10px 10px;
     font-weight: bold;
 }
+
+/*  admin.php   */
+.padding-top{
+    padding-top: 20px;;
+}
+/*.form-control .date{*/
+    /*line-height: 1.25rem;*/
+/*}*/

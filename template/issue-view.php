@@ -30,22 +30,33 @@ wp_enqueue_style( 'issue-view', URL_ITS . 'css/issue-view.css' );
                     <b>Issue ID: <?php  echo $id;?></b>
                 </div>
                 <div class="col-lg-12">
-                    Description:<p> <?php echo post()->meta($id, 'issue_description'); ?> </p>
+                    <b>Description: </b>
+                    <p><?php echo post()->meta($id, 'issue_description'); ?> </p>
                 </div>
                 <div class="col-lg-12">
-                    Posted by: <?php echo post()->meta($id, 'issue_author'); ?>
+                    <b>Posted by:</b> <?php echo post()->meta($id, 'issue_author'); ?>
                 </div>
                 <div class="col-lg-12">
-                    Assigned to: <?php echo post()->meta($id, 'issue_assignee'); ?>
+                    <b>Assigned to:</b> <?php
+                    $assignees =  post()->meta($id, 'issue_assignee');
+                    foreach($assignees as $assignee){
+                        echo $assignee .", ";
+                    }
+                    ?>
                 </div>
                 <div class="col-lg-12">
                     Deadline: <?php echo post()->meta($id, 'issue_deadline'); ?>
                 </div>
                 <div class="col-lg-12">
-                    Labels: <?php echo post()->meta($id, 'issue_label'); ?>
+                    <b>Labels:</b> <?php
+                    $categories = post()->meta($id, 'issue_label');
+                        foreach($categories as $category){
+                            echo $category .", ";
+                        }
+                    ?>
                 </div>
                 <div class="col-lg-12 status">
-                    Status: <?php echo post()->meta($id, 'issue_status'); ?>
+                    <b>Status:</b> <?php echo post()->meta($id, 'issue_status'); ?>
                 </div>
 
             </div>
