@@ -162,17 +162,19 @@ class post
     /**
      * get ID of posts & post meta of child category under parents category
      */
-    public function  getPostsId()
+    public function getPosts()
     {
 
         $categories = $this->getCategories();
         foreach ($categories as $category) {
             $posts[] = get_posts(array(
                 'category' => $category->term_id,
-                'fields' => 'ids' // to get only post_ids
             ));
         };
-        return $posts;
+        foreach($posts as $post){
+            $single_post = $post;
+        }
+        return $single_post;
     }
 
     /*

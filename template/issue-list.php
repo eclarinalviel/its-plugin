@@ -1,16 +1,6 @@
 <?php
+$posts = post()->getPosts();
 
-//$search_posts = post()->search_posts;
-if( in('search_field') ) {
-    $search_posts = get_posts(array(
-        's' => in('search_field')
-    ));
-}
-if($search_posts){
-    $posts = $search_posts;
-}else {
-    $posts = post()->getPostsId();
-}
 ?>
 <div class="wrap">
 
@@ -47,31 +37,31 @@ if($search_posts){
         </form>
 
         <?php if ( $posts ) {
-            for($i = 0; $i < count($posts); $i++) {
+//            for($i = 0; $i < count($posts); $i++) {
 
-                foreach ($posts[$i] as $key => $id) {
+                foreach ($posts as $single_post) {
                     ?>
                     <div class="col-lg-4">
                         <div class="card text-xs-center">
                             <div class="card-block">
-                                <h4 class="card-title"><?php echo post()->meta($id, 'issue_title'); ?></h4>
+                                <h4 class="card-title"><?php echo post()->meta($single_post->ID, 'issue_title'); ?></h4>
                                 <p class="card-text">
                                     Label: <?php
                                     $cat = post()->meta($id, 'issue_label');
                                     echo $cat; ?><br/>
-                                    Assigned to: <?php echo post()->meta($id, 'issue_assignee'); ?><br/>
-                                    Deadine: <?php echo post()->meta($id, 'issue_deadline'); ?><br/>
-                                    Status: <?php echo post()->meta($id, 'issue_status') ?><br/>
-                                    Posted by: <?php echo post()->meta($id, 'issue_author'); ?><br/>
+                                    Assigned to: <?php echo post()->meta($single_post->ID, 'issue_assignee'); ?><br/>
+                                    Deadine: <?php echo post()->meta($single_post->ID, 'issue_deadline'); ?><br/>
+                                    Status: <?php echo post()->meta($single_post->ID, 'issue_status') ?><br/>
+                                    Posted by: <?php echo post()->meta($single_post->ID, 'issue_author'); ?><br/>
                                 </p>
 
                                 <input type="hidden" name="do" value="view_issue">
-                                <a href="<?php echo issues()->viewURL($id)?>" target="_blank" class="btn btn-primary"> View Issue </a>
+                                <a href="<?php echo issues()->viewURL($single_post->ID)?>" target="_blank" class="btn btn-primary"> View Issue </a>
                                 </form>
                             </div>
                             <div class="card-footer text-muted">
                                 <?php
-                                $post_date = get_the_time('Y-m-d',$id);
+                                $post_date = get_the_time('Y-m-d',$single_post->ID);
                                 $deadline = post()->meta($id, 'issue_deadline');
 
                                 $now = date("Y-m-d");
@@ -90,7 +80,7 @@ if($search_posts){
                     </div>
 
                 <?php }
-            }
+//            }
         } ?>
     </div>
 
