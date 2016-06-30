@@ -50,12 +50,13 @@ class post
 
     /**
      * @return mixed
-     * @todo unit test on db insert error, array (assignees)
+     * @todo unit test on db insert error, array (assignees), parent category by default
      */
-    private function post_create($id = 0)
+    private function post_create($id = 0, $update = NULL)
     {
         if (!in('issue_title')) ferror(-50014, 'Title is not provided');
         if (!in('issue_description')) ferror(-50015, 'Description is not provided');
+
         $category = in('issue_label');
         foreach($category as $cat_id){ // get the name of each category
             $cat_name[] = get_cat_name($cat_id);
@@ -74,10 +75,17 @@ class post
         $this->meta($post_ID, 'issue_title', in('issue_title'));
         $this->meta($post_ID, 'issue_description', in('issue_description'));
         $this->meta($post_ID, 'issue_status', in('issue_status'));
-        $this->meta($post_ID, 'issue_deadline', in('issue_deadline')); 
+        $this->meta($post_ID, 'issue_deadline', in('issue_deadline'));
         $this->meta($post_ID, 'issue_author', in('issue_author'));
-        $this->meta($post_ID, 'issue_label', $cat_name); //saves serialize array on db (multiple values)
-        $this->meta($post_ID,'issue_assignee',in('issue_assignee')); //saves serialize array on db (multiple values)
+//        $this->meta($post_ID, 'issue_label', $cat_name); //saves serialize array on db (multiple values)
+//        $this->meta($post_ID,'issue_assignee',in('issue_assignee')); //saves serialize array on db (multiple values)
+        foreach( $cat_name as $cat ){
+            $this->meta($post_ID, 'issue_label', $cat);
+        }
+        $assignees = in('issue_assignee');
+        foreach( $assignees as $assignee ){
+            $this->meta($post_ID, 'issue_assignee', $assignee);
+        }
 
         if (is_wp_error($post_ID)) {
             return $post_ID->get_error_message();
@@ -94,12 +102,11 @@ class post
     public function meta($post_ID, $key, $value = null)
     {
         if ($value) {
-//            delete_term_meta( $post_ID, $key );
-//            add_post_meta( $post_ID, $key, $value, true );
+            add_post_meta( $post_ID, $key, $value );
             /*  update_post_meta updates the value of existing meta key;
             *   If post_id not exists, it will call the add_post_meta function.
             * */
-            update_post_meta($post_ID, $key, $value);
+//            update_post_meta($post_ID, $key, $value);
             return null;
         } else {
             return get_post_meta($post_ID, $key, true);
@@ -108,7 +115,7 @@ class post
     }
 
     /*
-     * @todo Unit testing; if lowercase, not empty, true
+     * @todo Unit testing; not empty, true
      * */
     private function label_create()
     {
@@ -229,12 +236,22 @@ class post
     {
         //get the post based on post_ID on segment 2 (http://website.com/issue/view/2096)
 //        $this->getPost(in('id'));
-        if
-        (!in('id')
-        ) ferror(64231, 'Post ID is not set..');
+        if (!in('id')) ferror(64231, 'Post ID is not set..');
         if (!is_numeric(in('id'))) ferror(64232, 'Invalid Post ID.');
+        //delete the existing meta first
+        $this->delete_meta(in('id'), 'issue_title' );
+        $this->delete_meta(in('id'), 'issue_description' );
+        $this->delete_meta(in('id'), 'issue_deadline' );
+        $this->delete_meta(in('id'), 'issue_status' );
+        $this->delete_meta(in('id'), 'issue_label' );
+        $this->delete_meta(in('id'), 'issue_assignee' );
+        // create the new meta values
         $this->post_create(in('id'));
 
+    }
+
+    private function delete_meta($post_ID, $key){
+        delete_post_meta($post_ID, $key );
     }
 
     /*
@@ -257,6 +274,8 @@ class post
 //        var_dump($author);
         if (!is_user_logged_in()) ferror(9323, "Please login first.");
         if ($current_user->user_login == $author) { //if the current user is the author of post
+            // delete the meta value first to avoid duplicate datas
+            $this->delete_meta($post_ID, 'issue_status');
             $this->meta($post_ID, 'issue_status', 'close');
         } else {
             ferror(9323, "You can't close the issue you didn't posted. Only " . $author . " can close this issue");
@@ -276,12 +295,6 @@ class post
      * @todo unit testing
      * */
     public function issue_search(){
-        /*Things to consider:
-         * is searching possible even without input? YES, when select is clicked
-         * is searching possible without filter click? YES, using textbox
-         * Use multiple if else for each request? NO! use universal search instead. Except for "Assigned to you".
-         * */
-
         // Get the categories under parent category - ITS
         $categories = $this->getCategories();
         foreach ($categories as $category) {
@@ -294,17 +307,13 @@ class post
             $args = array(
                 'posts_per_page' => -1,
                 'category__in' => $ids,
-                'meta_query' => array( // not accurate
-                    'key' => 'issue_assignee',
-                    'value' => $current_user->user_login,
-                    'compare' => 'IN'
-                )
+                'meta_key' => 'issue_assignee',
+                'meta_value' => $current_user->user_login,
             );
         } elseif( in('search_field')) { // If search using search field
 
             if (in('filter')) { //  There's a filter selected
                 $args = $this->search_meta(in('filter'), in('search_field'), in('deadline'));
-                var_dump($args);
             } else { // No filters selected;
                 $args = $this->search_meta('', in('search_field'), in('deadline'));
             }
@@ -318,7 +327,6 @@ class post
     }
 
     public function search_meta($meta_keys = NULL, $value = NULL, $deadline = NULL){
-
         if(!isset($meta_keys) || empty($meta_keys)) { // If there's no meta key passed, use this one
             $meta_keys = array('issue_title', 'issue_content', 'issue_label', 'issue_assignees', 'issue_author', 'issue_deadline');
         }
@@ -333,9 +341,8 @@ class post
         // Check if atleast either $value or $deadline is not empty/null
         if( isset($value) && !empty($value) || isset($deadline) && !empty($deadline) ){
             for($i = 0; $i <= count($meta_keys); $i++){
-//                echo $meta_keys[$i] . " Value: " .$value;
                 $result = array(
-                    'posts_per_page' => -1, //OK
+                    'posts_per_page' => -1,
                     'category__in' => $ids,
                     'meta_key' => $meta_keys[$i],
                     'meta_value' => array($value, $deadline)

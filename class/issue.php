@@ -96,6 +96,10 @@ class issues {
         return home_url('wp-admin/admin.php?page=issue-tracker-plugin%2Ftemplate%2Fissue-list.php');
     }
 
+    public function urlCategoryPage() {
+        return home_url('wp-admin/admin.php?page=issue-tracker-plugin%2Ftemplate%2Flabels.php');
+    }
+
     private function loadTemplate($file)
     {
         $new_template = locate_template( array( $file ) );

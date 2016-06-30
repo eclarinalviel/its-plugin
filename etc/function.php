@@ -65,6 +65,11 @@ function url_list_page() {           echo get_url_list_page(); }
 function get_url_list_page() {       return issues()->urlListPage(); }
 
 
+function url_category_page() {           echo get_url_category_page(); }
+
+function get_url_category_page() {       return issues()->urlCategoryPage(); }
+
+
 /**
  * It echoes / displays / alerts / goes back depending on the input.
  *

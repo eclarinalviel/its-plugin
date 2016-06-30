@@ -53,19 +53,23 @@ wp_enqueue_style( 'issue-view', URL_ITS . 'css/issue-view.css' );
                             <h4 class="card-title"><?php echo post()->meta($single_post->ID, 'issue_title'); ?></h4>
                             <p class="card-text">
                             <b>Label: </b>
-                            <?php $categories = post()->meta($single_post->ID, 'issue_label');
+                            <?php $categories = get_post_meta($single_post->ID, 'issue_label');
+//                            var_dump($categories);
                             foreach($categories as $category){
                                 echo $category .", ";
                             }
                             ?><br/>
                             <b>Assigned to:</b> <?php
-                            $assignees =  post()->meta($single_post->ID, 'issue_assignee');
+                            $assignees =  get_post_meta($single_post->ID, 'issue_assignee');
                             foreach($assignees as $assignee){
                                 echo $assignee .", ";
                             }
 
                             ?><br/>
-                                <b>Deadine:</b> <?php echo post()->meta($single_post->ID, 'issue_deadline'); ?><br/>
+                                <b>Deadine:</b> <?php
+                                $deadline = post()->meta($single_post->ID, 'issue_deadline');
+                                if( $deadline ){ echo $deadline; }else{echo "Not set."; }
+                                ?><br/>
                                 <b>Status:</b> <?php echo post()->meta($single_post->ID, 'issue_status') ?><br/>
                                 <b>Posted by: </b><?php echo post()->meta($single_post->ID, 'issue_author'); ?><br/>
                             </p>

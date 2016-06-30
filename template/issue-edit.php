@@ -1,6 +1,7 @@
 <?php
 get_header();
-
+//$user_login = wp_get_current_user();
+$users = post()->getUsers();
 $categories = post()->getCategories();
 $post = post()->getPost(seg(2)); // get the issue ID through URL segment
 //var_dump($post->ID);
@@ -43,21 +44,24 @@ $id = $post->ID;
                 </div>
 
                 <div class="col-lg-4 container">
-                    <div class="panel panel-default">
-                        <div class="panel-heading"></div>
-                        <div class="panel-body">
-                            <label for="label"> Issue Type: </label>
+                    <div class="">
+                        <label> Labels: </label>
+                            <div class="">
+                                <?php $labels = get_post_meta($id, 'issue_label', false); ?> <!-- False = Return multiple values -->
+                                <?php foreach($categories as $category):
+                                        if( in_array($category->cat_name, $labels) ) {
+                                            $check = "checked";
+                                        }else{
+                                            $check = "";
+                                        }
+                                     ?>
+                                    <a class="dropdown-item" href="#">
+                                        <input type="checkbox" id="label" value="<?php echo $category->cat_ID; ?>" name="issue_label[]" <?php echo $check; ?>>
+                                        <label for="label"><?php echo $category->cat_name; ?></label>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
 
-                            <select id = "label" class="col-lg-12 c-select" name = "issue_label">
-                                <?php $label = post()->meta($id, 'issue_label'); ?>
-
-                                <?php foreach($categories as $cat) { ?>
-                                    <option value="<?php echo $cat->cat_name;  ?>" <?php if( $cat->cat_name == $label) echo "selected"; ?> >
-                                        <?php echo $cat->cat_name; ?>
-                                    </option >
-                                <?php } ?>
-                            </select >
-                        </div>
                     </div>
 
                     <div class="">
@@ -66,13 +70,24 @@ $id = $post->ID;
                     </div>
 
                     <div class="">
-                        <label for="assignee"> Assignees: </label>
-                        <select id="assignee" class="col-lg-12 c-select" name="issue_assignee" value="<?php echo post()->meta($id, 'issue_assignee'); ?>">
-                            <option selected disabled> Assignee </option>
-                        </select>
+                        <label> Assignees: </label>
+                        <?php $assignees = get_post_meta($id, 'issue_assignee', false); ?> <!-- False = Return multiple values -->
+                                <?php foreach($users as $user):
+                                    if( in_array($user->user_login, $assignees) ) {
+                                        $check = "checked";
+                                    }else{
+                                        $check = "";
+                                    } ?>
+                                    <a class="dropdown-item" href="#">
+                                        <input type="checkbox" id="assignee" value="<?php echo $user->user_login; ?>" name="issue_assignee[]" <?php echo $check; ?>>
+                                        <label for="assignee"><?php echo $user->user_login; ?></label>
+                                    </a>
+                                <?php endforeach; ?>
+                        </div>
+
                     </div>
 
-                    <div class="">
+                    <div class="col-lg-4">
                         <label for="status"> Status: </label>
                         <?php $status = post()->meta($id, 'issue_status'); ?>
                         <select id="status" class="col-lg-12 c-select" name="issue_status">

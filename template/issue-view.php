@@ -38,7 +38,7 @@ wp_enqueue_style( 'issue-view', URL_ITS . 'css/issue-view.css' );
                 </div>
                 <div class="col-lg-12">
                     <b>Assigned to:</b> <?php
-                    $assignees =  post()->meta($id, 'issue_assignee');
+                    $assignees =  get_post_meta($id, 'issue_assignee');
                     foreach($assignees as $assignee){
                         echo $assignee .", ";
                     }
@@ -49,7 +49,7 @@ wp_enqueue_style( 'issue-view', URL_ITS . 'css/issue-view.css' );
                 </div>
                 <div class="col-lg-12">
                     <b>Labels:</b> <?php
-                    $categories = post()->meta($id, 'issue_label');
+                    $categories = get_post_meta($id, 'issue_label');
                         foreach($categories as $category){
                             echo $category .", ";
                         }
