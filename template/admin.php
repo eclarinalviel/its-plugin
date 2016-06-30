@@ -66,38 +66,39 @@ wp_enqueue_style( 'issue-view', URL_ITS . 'css/issue-view.css' );
 
                 </div>
 
-
-                    <div class="">
-                        <label for="milestone"> Deadline: </label>
-                        <input type="date" class="form-control" name="issue_deadline">
-                    </div>
-
-                    <div class="">
-                        <label> Assignees: </label>
-                        <div class="input-group-btn">
-                            <button tabindex="-1" class="btn btn-secondary" type="button">Assign to:</button>
-                            <button tabindex="-1" data-toggle="dropdown" class="btn btn-secondary dropdown-toggle" type="button">
-                                <span class="caret"></span>
-                            </button>
-                            <div class="dropdown-menu">
-                                <?php foreach($users as $user){ ?>
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" value="<?php echo $user->user_login; ?>" name="issue_assignee[]">
-                                    <?php echo $user->user_login; ?>
-                                </a>
-                                <?php } ?>
-                            </div>
+                <div class="">
+                    <label> Assignees: </label>
+                    <div class="input-group-btn">
+                        <button tabindex="-1" class="btn btn-secondary" type="button">Assign to:</button>
+                        <button tabindex="-1" data-toggle="dropdown" class="btn btn-secondary dropdown-toggle" type="button">
+                            <span class="caret"></span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <?php foreach($users as $user){ ?>
+                            <a class="dropdown-item" href="#">
+                                <input type="checkbox" value="<?php echo $user->user_login; ?>" name="issue_assignee[]">
+                                <?php echo $user->user_login; ?>
+                            </a>
+                            <?php } ?>
                         </div>
-
                     </div>
 
-                    <div class="">
-                        <label for="status"> Status: </label>
-                        <select id="status" class="col-lg-12 c-select" name="issue_status">
-                            <option value="open">Open</option>
-                            <option value="close">Close</option>
-                        </select>
-                    </div>
+                </div>
+
+                <div class="">
+                    <label for="milestone"> Deadline: </label>
+                    <input type="date" class="form-control" name="issue_deadline">
+                </div>
+
+                <div class="">
+                    <label for="status"> Status: </label>
+                    <select id="status" class="col-lg-12 c-select" name="issue_status">
+                        <option value="open">Open</option>
+                        <option value="close">Close</option>
+                    </select>
+                </div>
+
+
                 </div>
             </div>
 

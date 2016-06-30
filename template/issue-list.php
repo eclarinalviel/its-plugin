@@ -34,8 +34,11 @@ wp_enqueue_style( 'issue-view', URL_ITS . 'css/issue-view.css' );
                             <input type="submit" class="btn btn-secondary btn-block" value="Assigned to you" name="assigned_to_user">
                         </div>
                     </div>
-                    <input type="text" class="form-control" name="search_field" placeholder="Search by title, author, labels etc.">
+                    <input type="text" class="form-control" name="search_field" placeholder="Search in all criterias..">
                 </div>
+            </div>
+            <div class="col-lg-1">
+                <label> Deadline: </label>
             </div>
             <div class="col-lg-3">
                 <input type="date" class="form-control date" name="deadline" >

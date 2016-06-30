@@ -18,6 +18,6 @@
 .padding-top{
     padding-top: 20px;;
 }
-/*.form-control .date{*/
-    /*line-height: 1.25rem;*/
-/*}*/
+input[type=date].form-control{
+    line-height: 1.25rem;
+}
