@@ -318,7 +318,8 @@ class post
                 $args = $this->search_meta('', in('search_field'), in('deadline'));
             }
 
-        }elseif ( in('deadline') ){ // search only by deadline
+        }
+        if ( in('deadline') ){ // search only by deadline
             $args = $this->search_meta('', '', in('deadline'));
         }
 
