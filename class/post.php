@@ -318,8 +318,7 @@ class post
                 $args = $this->search_meta('', in('search_field'), in('deadline'));
             }
 
-        }
-        if ( in('deadline') ){ // search only by deadline
+        }elseif ( in('deadline') ){ // search only by deadline
             $args = $this->search_meta('', '', in('deadline'));
         }
 
@@ -327,8 +326,8 @@ class post
         return $post;
     }
 
-    public function search_meta($meta_keys = NULL, $value = NULL, $deadline = NULL){
-        if(!isset($meta_keys) || empty($meta_keys)) { // If there's no meta key passed, use this one
+    private function search_meta($meta_keys = NULL, $value = NULL, $deadline = NULL){
+        if(!isset($meta_keys) && empty($meta_keys)) { // If there's no meta key passed, use this one
             $meta_keys = array('issue_title', 'issue_content', 'issue_label', 'issue_assignees', 'issue_author', 'issue_deadline');
         }
 
@@ -342,6 +341,7 @@ class post
         // Check if atleast either $value or $deadline is not empty/null
         if( isset($value) && !empty($value) || isset($deadline) && !empty($deadline) ){
             for($i = 0; $i <= count($meta_keys); $i++){
+//                echo $meta_keys[$i];
                 $result = array(
                     'posts_per_page' => -1,
                     'category__in' => $ids,
@@ -349,7 +349,6 @@ class post
                     'meta_value' => array($value, $deadline)
                 );
             }
-
         }
         return $result;
     }
